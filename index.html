@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>StatementIQ — US PE/VC Fund Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0d1b2a;--navy2:#1b3a5c;
+  --gold:#b8860b;--gold-mid:#d4a017;--gold-light:#f5e6b8;
+  --paper:#faf9f6;--surface:#f2f0eb;--border:#e0ddd6;
+  --ink:#0a0a0a;--ink2:#3a3a3a;--ink3:#717171;
+  --green:#1a4731;--green-bg:#e8f5ee;
+  --red:#7c1d1d;--red-bg:#fdeaea;
+  --radius:6px;--radius-lg:12px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--ink);font-size:14px;line-height:1.5}
+.screen{display:none}.screen.active{display:block}
+
+.auth-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--surface);padding:2rem}
+.auth-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.25rem;width:100%;max-width:400px;box-shadow:0 4px 24px rgba(0,0,0,0.06)}
+.auth-logo{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--ink);margin-bottom:0.15rem}
+.auth-logo span{color:var(--gold-mid)}
+.auth-tag{font-size:0.72rem;color:var(--ink3);margin-bottom:1.5rem;letter-spacing:0.04em;text-transform:uppercase}
+.auth-tabs{display:flex;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.25rem}
+.atab{flex:1;padding:0.48rem;font-size:0.8rem;cursor:pointer;background:var(--surface);color:var(--ink3);border:none;font-family:'DM Sans',sans-serif}
+.atab.active{background:var(--navy);color:#fff;font-weight:500}
+.field{margin-bottom:0.85rem}
+.field label{display:block;font-size:0.75rem;color:var(--ink3);margin-bottom:4px}
+.field input,.field select{width:100%;padding:0.5rem 0.75rem;border:1px solid var(--border);border-radius:var(--radius);font-size:0.85rem;font-family:'DM Sans',sans-serif;color:var(--ink);background:#fff}
+.btn-full{width:100%;padding:0.65rem;border-radius:var(--radius);font-size:0.88rem;font-weight:500;cursor:pointer;border:none;background:var(--navy);color:#fff;font-family:'DM Sans',sans-serif}
+.auth-hint{text-align:center;margin-top:0.75rem;font-size:0.75rem;color:var(--ink3)}
+.auth-hint a{color:var(--gold-mid);cursor:pointer}
+
+.app-shell{display:grid;grid-template-columns:205px 1fr;min-height:100vh}
+.sidebar{background:var(--navy);display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.sb-logo{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold-light);padding:1.3rem 1.2rem 0.4rem}
+.sb-logo span{color:var(--gold-mid)}
+.sb-tag{font-size:0.62rem;color:#4a6a8a;padding:0 1.2rem 1.2rem;letter-spacing:0.06em;text-transform:uppercase;border-bottom:1px solid #1e3555}
+.sb-nav{padding:0.75rem 0;flex:1}
+.nav-item{display:flex;align-items:center;gap:9px;padding:0.58rem 1.2rem;font-size:0.8rem;color:#8899aa;cursor:pointer;border-left:2px solid transparent}
+.nav-item:hover{color:#c8d8e8;background:rgba(255,255,255,0.04)}
+.nav-item.active{color:var(--gold-light);border-left-color:var(--gold-mid);background:rgba(255,255,255,0.07)}
+.sb-bottom{padding:1rem 1.2rem;border-top:1px solid #1e3555}
+.sb-name{font-size:0.78rem;font-weight:500;color:#c8d8e8}
+.sb-fund{font-size:0.7rem;color:#4a6a8a;margin-top:1px}
+.sb-logout{font-size:0.7rem;color:#4a6a8a;cursor:pointer;margin-top:6px}
+.sb-logout:hover{color:#8899aa}
+
+.main{background:var(--surface);min-height:100vh}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0.85rem 1.5rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.topbar-title{font-size:0.95rem;font-weight:500}
+.tb-right{display:flex;gap:8px}
+.page{display:none}.page.active{display:block}
+.page-body{padding:1.25rem 1.5rem}
+
+.btn{padding:0.4rem 0.9rem;font-size:0.78rem;border-radius:var(--radius);cursor:pointer;font-weight:500;border:1px solid var(--border);background:#fff;color:var(--ink);font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{background:var(--surface)}
+.btn.navy{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn.navy:hover{background:var(--navy2)}
+.btn.gold{background:var(--gold-mid);color:#fff;border-color:var(--gold-mid)}
+.btn:disabled{opacity:0.5;cursor:not-allowed}
+
+.metrics-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+.metric-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.1rem}
+.mc-label{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink3);margin-bottom:4px}
+.mc-val{font-size:1.2rem;font-weight:500;color:var(--ink)}
+.mc-val.pos{color:var(--green)}
+.mc-sub{font-size:0.68rem;color:var(--ink3);margin-top:2px}
+
+.tcard{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:1.25rem}
+.tcard-header{padding:0.85rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.tcard-title{font-size:0.88rem;font-weight:500}
+.search{padding:0.35rem 0.65rem;font-size:0.75rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--ink);font-family:'DM Sans',sans-serif;width:180px}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th{font-size:0.68rem;color:var(--ink3);font-weight:500;padding:0.55rem 1rem;text-align:left;border-bottom:1px solid var(--border);background:var(--surface);text-transform:uppercase;letter-spacing:0.05em}
+td{font-size:0.79rem;padding:0.6rem 1rem;border-bottom:1px solid var(--border);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface)}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:0.67rem;font-weight:500}
+.badge.green{background:var(--green-bg);color:var(--green)}
+.badge.amber{background:#fef3c7;color:#92400e}
+.badge.blue{background:#e6f1fb;color:#0C447C}
+.row-acts{display:flex;gap:5px}
+.iact{background:none;border:none;cursor:pointer;color:var(--ink3);font-size:14px;padding:2px}
+.iact:hover{color:var(--ink)}
+
+.fpanel{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1rem}
+.fpanel-title{font-size:0.88rem;font-weight:500;margin-bottom:1rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+.fgrid.three{grid-template-columns:1fr 1fr 1fr}
+.fgrid.four{grid-template-columns:1fr 1fr 1fr 1fr}
+.ff{display:flex;flex-direction:column;gap:4px}
+.ff.full{grid-column:1/-1}
+.ff label{font-size:0.73rem;color:var(--ink3)}
+.ff input,.ff select{padding:0.45rem 0.65rem;font-size:0.82rem;border:1px solid var(--border);border-radius:var(--radius);background:#fff;color:var(--ink);font-family:'DM Sans',sans-serif}
+.form-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+
+.txn-header{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 32px;gap:6px;margin-bottom:4px}
+.txn-header span{font-size:0.67rem;color:var(--ink3);text-transform:uppercase;letter-spacing:0.04em}
+.txn-row-item{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 32px;gap:6px;align-items:end;margin-bottom:6px}
+.rm-btn{background:none;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;color:var(--red);width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.add-txn{font-size:0.75rem;color:#0C447C;cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:4px 0}
+
+.tabs{display:flex;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;width:fit-content;margin-bottom:1.25rem}
+.tab{padding:0.42rem 1rem;font-size:0.78rem;cursor:pointer;background:var(--surface);color:var(--ink3);border:none;font-family:'DM Sans',sans-serif}
+.tab.active{background:var(--navy);color:#fff;font-weight:500}
+
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius-lg);padding:2rem;text-align:center;cursor:pointer}
+.upload-zone:hover{border-color:var(--navy2);background:#f0f4f8}
+.uz-icon{font-size:2rem;color:var(--ink3);margin-bottom:0.4rem}
+.uz-title{font-size:0.92rem;font-weight:500;margin-bottom:0.2rem}
+.uz-sub{font-size:0.75rem;color:var(--ink3)}
+.prog-wrap{margin-top:0.9rem;display:none}
+.prog-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:3px}
+.prog-fill{height:100%;background:var(--navy);width:0%;transition:width 0.2s}
+.prog-lbl{font-size:0.72rem;color:var(--ink3)}
+
+.spinner-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:1rem}
+.spinner-overlay.active{display:flex}
+.spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,0.2);border-top-color:var(--gold-light);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner-msg{color:var(--gold-light);font-size:0.9rem;font-weight:500}
+
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;padding:0.6rem 1.1rem;border-radius:var(--radius);font-size:0.8rem;display:none;z-index:9998;box-shadow:0 4px 20px rgba(0,0,0,0.2);max-width:340px}
+.toast.navy{background:var(--navy);color:var(--gold-light)}
+.toast.green{background:#1a4731;color:#c6f6d5}
+.toast.red{background:#7c1d1d;color:#fed7d7}
+
+.curr-pill{display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.7rem;font-weight:500;background:var(--navy);color:var(--gold-light);margin-left:6px}
+.chip{font-size:0.7rem;background:#fff;border:1px solid var(--border);border-radius:4px;padding:2px 8px;font-family:monospace}
+.inv-item{display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1rem;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;background:var(--surface);margin-bottom:6px}
+.inv-item:hover{background:#e8eef5;border-color:#c8d8e8}
+</style>
+</head>
+<body>
+
+<div class="spinner-overlay" id="spinner">
+  <div class="spinner"></div>
+  <div class="spinner-msg" id="spinner-msg">Generating statement…</div>
+</div>
+<div class="toast navy" id="toast"></div>
+
+<!-- ══ LOGIN ══ -->
+<div class="screen active" id="sc-login">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">Statement<span>IQ</span></div>
+      <div class="auth-tag">US Private Equity &amp; Venture Capital</div>
+      <div class="auth-tabs">
+        <button class="atab active" onclick="authSwitch('login',this)">Sign in</button>
+        <button class="atab" onclick="authSwitch('signup',this)">Create account</button>
+      </div>
+      <div id="login-form">
+        <div class="field"><label>Email address</label><input type="email" value="james@alpineequity.com"/></div>
+        <div class="field"><label>Password</label><input type="password" value="••••••••"/></div>
+        <button class="btn-full" onclick="goApp()">Sign in →</button>
+        <div class="auth-hint"><a onclick="showToast('Reset link sent.','navy')">Forgot password?</a></div>
+      </div>
+      <div id="signup-form" style="display:none">
+        <div class="field"><label>Full name</label><input placeholder="James Whitfield"/></div>
+        <div class="field"><label>Fund name</label><input placeholder="Alpine Equity Partners"/></div>
+        <div class="field"><label>Fund type</label>
+          <select>
+            <option>Private Equity</option>
+            <option>Venture Capital</option>
+            <option>Growth Equity</option>
+            <option>Real Assets</option>
+            <option>Credit / Debt</option>
+          </select>
+        </div>
+        <div class="field"><label>Email address</label><input type="email" placeholder="you@yourfund.com"/></div>
+        <div class="field"><label>Password</label><input type="password" placeholder="Minimum 8 characters"/></div>
+        <button class="btn-full" onclick="goApp()">Start free 14-day trial →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div class="screen" id="sc-app">
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sb-logo">Statement<span>IQ</span></div>
+      <div class="sb-tag">PE / VC Fund Administration</div>
+      <div class="sb-nav">
+        <div class="nav-item active" onclick="goPage('p-dashboard',this)">📊 Dashboard</div>
+        <div class="nav-item" onclick="goPage('p-lps',this)">🏛 Limited Partners</div>
+        <div class="nav-item" onclick="goPage('p-generate',this)">📄 Generate Statement</div>
+        <div class="nav-item" onclick="goPage('p-import',this)">📤 Bulk Import</div>
+        <div class="nav-item" onclick="goPage('p-history',this)">🕓 History</div>
+        <div class="nav-item" onclick="goPage('p-settings',this)">⚙ Settings</div>
+      </div>
+      <div class="sb-bottom">
+        <div class="sb-name" id="sb-name">James Whitfield</div>
+        <div class="sb-fund" id="sb-fund">Alpine Equity Partners</div>
+        <div class="sb-logout" onclick="goLogin()">↩ Sign out</div>
+      </div>
+    </div>
+
+    <div class="main">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="p-dashboard">
+        <div class="topbar">
+          <span class="topbar-title">Dashboard</span>
+          <div class="tb-right">
+            <button class="btn" onclick="goPage('p-generate',null)">＋ New Statement</button>
+            <button class="btn navy" onclick="goPage('p-import',null)">↑ Bulk Import</button>
+          </div>
+        </div>
+        <div class="page-body">
+          <div class="metrics-row">
+            <div class="metric-card"><div class="mc-label">Limited Partners</div><div class="mc-val" id="m-lps">0</div><div class="mc-sub">Saved in system</div></div>
+            <div class="metric-card"><div class="mc-label">Statements Generated</div><div class="mc-val" id="m-stmts">0</div><div class="mc-sub">This session</div></div>
+            <div class="metric-card"><div class="mc-label">Emails Sent</div><div class="mc-val" id="m-emails">0</div><div class="mc-sub">To LPs</div></div>
+            <div class="metric-card"><div class="mc-label">Trial Status</div><div class="mc-val pos">Active</div><div class="mc-sub">14 days remaining</div></div>
+          </div>
+          <div class="tcard">
+            <div class="tcard-header">
+              <span class="tcard-title">Recent LP Statements</span>
+              <input class="search" placeholder="Search LP name…" oninput="filterHistory(this.value)"/>
+            </div>
+            <table>
+              <colgroup><col style="width:20%"><col style="width:20%"><col style="width:12%"><col style="width:15%"><col style="width:13%"><col style="width:10%"><col style="width:10%"></colgroup>
+              <thead><tr><th>Limited Partner</th><th>Fund</th><th>Currency</th><th>Period</th><th>Gain / Loss</th><th>Email</th><th>Actions</th></tr></thead>
+              <tbody id="dash-tbody">
+                <tr><td colspan="7" style="text-align:center;color:var(--ink3);padding:2rem">No statements yet. Go to Generate Statement to create your first one.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIMITED PARTNERS -->
+      <div class="page" id="p-lps">
+        <div class="topbar">
+          <span class="topbar-title">Limited Partners</span>
+          <div class="tb-right"><button class="btn navy" onclick="goPage('p-generate',null)">＋ Add LP</button></div>
+        </div>
+        <div class="page-body">
+          <div class="tcard">
+            <div class="tcard-header"><span class="tcard-title">All LPs</span><input class="search" placeholder="Search…"/></div>
+            <table>
+              <colgroup><col style="width:22%"><col style="width:16%"><col style="width:20%"><col style="width:10%"><col style="width:14%"><col style="width:18%"></colgroup>
+              <thead><tr><th>LP Name</th><th>Account</th><th>Fund</th><th>Currency</th><th>Commitment</th><th>Actions</th></tr></thead>
+              <tbody id="lps-tbody">
+                <tr><td colspan="6" style="text-align:center;color:var(--ink3);padding:2rem">No LPs saved yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- GENERATE -->
+      <div class="page" id="p-generate">
+        <div class="topbar"><span class="topbar-title">Generate LP Statement</span></div>
+        <div class="page-body">
+          <div class="tabs">
+            <button class="tab active" onclick="genTab('manual',this)">Manual Entry</button>
+            <button class="tab" onclick="genTab('existing',this)">Select LP</button>
+          </div>
+
+          <div id="gen-manual">
+            <div class="fpanel">
+              <div class="fpanel-title">LP &amp; Fund Details</div>
+              <div class="fgrid">
+                <div class="ff"><label>Limited Partner name *</label><input id="g-lpname" placeholder="e.g. Sequoia Capital LP"/></div>
+                <div class="ff"><label>Account number *</label><input id="g-acct" placeholder="e.g. AEP-LP-001"/></div>
+                <div class="ff"><label>Fund name *</label><input id="g-fund" placeholder="e.g. Alpine Equity Partners Fund III"/></div>
+                <div class="ff"><label>LP email address *</label><input type="email" id="g-email" placeholder="lp@institution.com"/></div>
+                <div class="ff"><label>Vintage year</label><input type="number" id="g-vintage" placeholder="e.g. 2022"/></div>
+                <div class="ff"><label>Total commitment *</label><input type="number" id="g-commit" placeholder="e.g. 5000000"/></div>
+              </div>
+            </div>
+
+            <div class="fpanel">
+              <div class="fpanel-title">Currency &amp; Period</div>
+              <div class="fgrid four">
+                <div class="ff"><label>Currency *</label>
+                  <select id="g-curr">
+                    <option value="USD">USD — US Dollar ($)</option>
+                    <option value="EUR">EUR — Euro (€)</option>
+                    <option value="GBP">GBP — British Pound (£)</option>
+                    <option value="CAD">CAD — Canadian Dollar (C$)</option>
+                    <option value="AUD">AUD — Australian Dollar (A$)</option>
+                    <option value="CHF">CHF — Swiss Franc (Fr)</option>
+                    <option value="SGD">SGD — Singapore Dollar (S$)</option>
+                    <option value="JPY">JPY — Japanese Yen (¥)</option>
+                  </select>
+                </div>
+                <div class="ff"><label>Period from *</label><input type="date" id="g-from"/></div>
+                <div class="ff"><label>Period to *</label><input type="date" id="g-to"/></div>
+              </div>
+            </div>
+
+            <div class="fpanel">
+              <div class="fpanel-title">Opening Position</div>
+              <div class="fgrid three">
+                <div class="ff"><label>Opening shares / LP interests *</label><input type="number" id="g-oshares" placeholder="0.0000"/></div>
+                <div class="ff"><label>Opening NAV per share *</label><input type="number" id="g-onav" placeholder="0.00"/></div>
+                <div class="ff"><label>Closing NAV per share *</label><input type="number" id="g-cnav" placeholder="0.00"/></div>
+              </div>
+            </div>
+
+            <div class="fpanel">
+              <div class="fpanel-title">
+                Capital Activity
+                <span style="font-size:0.75rem;color:var(--ink3);font-weight:400">Capital Calls &amp; Distributions — optional</span>
+              </div>
+              <div class="txn-header">
+                <span>Transaction Type</span>
+                <span>Date</span>
+                <span>Shares / Units</span>
+                <span>Price per Share</span>
+                <span></span>
+              </div>
+              <div id="txn-list"></div>
+              <button class="add-txn" onclick="addTxn()">＋ Add capital call or distribution</button>
+              <div class="form-actions">
+                <button class="btn" onclick="saveLP()">💾 Save LP</button>
+                <button class="btn navy" onclick="generateStatement()">⚡ Generate + Download Excel</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="gen-existing" style="display:none">
+            <div class="fpanel">
+              <div class="fpanel-title">Select Limited Partner</div>
+              <div id="existing-list">
+                <p style="font-size:0.85rem;color:var(--ink3)">No LPs saved yet. Use Manual Entry to add your first LP.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BULK IMPORT -->
+      <div class="page" id="p-import">
+        <div class="topbar">
+          <span class="topbar-title">Bulk Import</span>
+          <div class="tb-right"><button class="btn" onclick="downloadTemplate()">↓ Download Template CSV</button></div>
+        </div>
+        <div class="page-body">
+          <div class="fpanel">
+            <div class="fpanel-title">Fund-Level Settings — applies to all imported LPs</div>
+            <div class="fgrid">
+              <div class="ff"><label>Fund name</label><input id="bulk-fund" placeholder="Alpine Equity Partners Fund III"/></div>
+              <div class="ff"><label>Currency</label>
+                <select id="bulk-curr">
+                  <option value="USD">USD — US Dollar</option>
+                  <option value="EUR">EUR — Euro</option>
+                  <option value="GBP">GBP — British Pound</option>
+                  <option value="CAD">CAD — Canadian Dollar</option>
+                  <option value="AUD">AUD — Australian Dollar</option>
+                  <option value="CHF">CHF — Swiss Franc</option>
+                  <option value="SGD">SGD — Singapore Dollar</option>
+                  <option value="JPY">JPY — Japanese Yen</option>
+                </select>
+              </div>
+              <div class="ff"><label>Closing NAV per share</label><input type="number" id="bulk-cnav" placeholder="0.00"/></div>
+              <div class="ff"><label>Period from</label><input type="date" id="bulk-from"/></div>
+              <div class="ff"><label>Period to</label><input type="date" id="bulk-to"/></div>
+            </div>
+          </div>
+          <div class="upload-zone" onclick="document.getElementById('csv-input').click()">
+            <input type="file" id="csv-input" accept=".csv" style="display:none" onchange="handleCSV(this)"/>
+            <div class="uz-icon">☁</div>
+            <div class="uz-title">Drop your CSV file here</div>
+            <div class="uz-sub">Or click to browse · max 10 MB · up to 500 LPs</div>
+            <div class="prog-wrap" id="prog-wrap">
+              <div class="prog-lbl" id="prog-lbl">Processing…</div>
+              <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+            </div>
+          </div>
+          <div style="margin-top:1rem;background:var(--surface);border-radius:var(--radius);padding:0.8rem 1rem">
+            <div style="font-size:0.75rem;font-weight:500;margin-bottom:6px">Required CSV columns</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px">
+              <span class="chip">lp_name</span>
+              <span class="chip">account_number</span>
+              <span class="chip">email</span>
+              <span class="chip">commitment</span>
+              <span class="chip">opening_shares</span>
+              <span class="chip">opening_nav</span>
+              <span class="chip">closing_nav</span>
+              <span class="chip">period_from</span>
+              <span class="chip">period_to</span>
+              <span class="chip">txn_date</span>
+              <span class="chip">txn_type</span>
+              <span class="chip">txn_shares</span>
+              <span class="chip">txn_price</span>
+            </div>
+            <div style="font-size:0.72rem;color:var(--ink3);margin-top:8px">txn_type values: <code>Capital Call</code> or <code>Distribution</code></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="page" id="p-history">
+        <div class="topbar"><span class="topbar-title">Statement History</span></div>
+        <div class="page-body">
+          <div class="tcard">
+            <div class="tcard-header">
+              <span class="tcard-title">All Generated Statements</span>
+              <input class="search" placeholder="Search LP…" oninput="filterHistory(this.value)"/>
+            </div>
+            <table>
+              <colgroup><col style="width:20%"><col style="width:20%"><col style="width:12%"><col style="width:15%"><col style="width:13%"><col style="width:10%"><col style="width:10%"></colgroup>
+              <thead><tr><th>Limited Partner</th><th>Fund</th><th>Currency</th><th>Period</th><th>Gain / Loss</th><th>Email</th><th>Actions</th></tr></thead>
+              <tbody id="hist-tbody">
+                <tr><td colspan="7" style="text-align:center;color:var(--ink3);padding:2rem">No statements yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="p-settings">
+        <div class="topbar"><span class="topbar-title">Settings</span></div>
+        <div class="page-body">
+          <div class="fpanel">
+            <div class="fpanel-title">Fund Profile</div>
+            <div class="fgrid">
+              <div class="ff"><label>Fund manager / GP name</label><input id="s-mgr" placeholder="James Whitfield"/></div>
+              <div class="ff"><label>Fund name</label><input id="s-fund" placeholder="Alpine Equity Partners"/></div>
+              <div class="ff"><label>Fund type</label>
+                <select id="s-type">
+                  <option>Private Equity</option><option>Venture Capital</option>
+                  <option>Growth Equity</option><option>Real Assets</option><option>Credit / Debt</option>
+                </select>
+              </div>
+              <div class="ff"><label>Contact email</label><input type="email" id="s-email" placeholder="gp@fund.com"/></div>
+              <div class="ff full"><label>Statement disclaimer text</label>
+                <input id="s-disclaimer" value="This statement is for informational purposes only and does not constitute an offer or solicitation. Past performance is not indicative of future results."/>
+              </div>
+            </div>
+            <div class="form-actions"><button class="btn navy" onclick="saveSettings()">Save changes</button></div>
+          </div>
+          <div class="fpanel">
+            <div class="fpanel-title">API Configuration</div>
+            <div class="fgrid">
+              <div class="ff full"><label>Backend API endpoint (your Vercel URL)</label>
+                <input id="s-api" placeholder="https://your-app.vercel.app/api/generate"/>
+              </div>
+            </div>
+            <p style="font-size:0.75rem;color:var(--ink3);margin-top:0.5rem">Leave blank to use the default <code>/api/generate</code>. Only change if frontend and backend are on different domains.</p>
+            <div class="form-actions"><button class="btn navy" onclick="saveSettings()">Save</button></div>
+          </div>
+          <div class="fpanel">
+            <div class="fpanel-title">Subscription Plan</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:0.4rem 0">
+              <div>
+                <div style="font-size:0.88rem;font-weight:500">Growth Plan — $299/month</div>
+                <div style="font-size:0.78rem;color:var(--ink3);margin-top:2px">Up to 200 LPs · Multi-currency · Excel + PDF export · Priority support</div>
+              </div>
+              <button class="btn" onclick="showToast('Redirecting to billing portal…','navy')">Manage billing</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ══ STATE ══════════════════════════════════════════════════════
+const state = {
+  lps:       JSON.parse(localStorage.getItem('siq_us_lps')      || '[]'),
+  history:   JSON.parse(localStorage.getItem('siq_us_history')  || '[]'),
+  settings:  JSON.parse(localStorage.getItem('siq_us_settings') || '{}'),
+  stmtCount: 0,
+  emailCount: 0,
+};
+function persist() {
+  localStorage.setItem('siq_us_lps',      JSON.stringify(state.lps));
+  localStorage.setItem('siq_us_history',  JSON.stringify(state.history));
+  localStorage.setItem('siq_us_settings', JSON.stringify(state.settings));
+}
+
+const CURR_SYMBOLS = {USD:'$',EUR:'€',GBP:'£',CAD:'C$',AUD:'A$',CHF:'Fr',SGD:'S$',JPY:'¥'};
+function sym(code){ return CURR_SYMBOLS[code] || '$'; }
+function fmtAmt(n, code) {
+  const s = sym(code);
+  if (n < 0) return `(${s}${Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})})`;
+  return `${s}${n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:0})}`;
+}
+
+// ══ AUTH ═══════════════════════════════════════════════════════
+function goApp(){
+  document.getElementById('sc-login').classList.remove('active');
+  document.getElementById('sc-app').classList.add('active');
+  loadSettings(); renderDashboard();
+}
+function goLogin(){
+  document.getElementById('sc-app').classList.remove('active');
+  document.getElementById('sc-login').classList.add('active');
+}
+function authSwitch(t,el){
+  document.querySelectorAll('.atab').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('login-form').style.display  = t==='login'  ? 'block':'none';
+  document.getElementById('signup-form').style.display = t==='signup' ? 'block':'none';
+}
+
+// ══ NAVIGATION ═════════════════════════════════════════════════
+function goPage(id,navEl){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(navEl){document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));navEl.classList.add('active')}
+  if(id==='p-lps')      renderLPs();
+  if(id==='p-generate') renderExistingList();
+  if(id==='p-history')  renderHistoryTable('hist-tbody');
+  if(id==='p-dashboard')renderDashboard();
+}
+function genTab(t,el){
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('gen-manual').style.display   = t==='manual'   ? 'block':'none';
+  document.getElementById('gen-existing').style.display = t==='existing' ? 'block':'none';
+  if(t==='existing') renderExistingList();
+}
+
+// ══ SETTINGS ═══════════════════════════════════════════════════
+function loadSettings(){
+  const s=state.settings;
+  if(s.mgr)  {document.getElementById('s-mgr').value=s.mgr; document.getElementById('sb-name').textContent=s.mgr;}
+  if(s.fund) {document.getElementById('s-fund').value=s.fund; document.getElementById('sb-fund').textContent=s.fund;}
+  if(s.email)     document.getElementById('s-email').value=s.email;
+  if(s.disclaimer)document.getElementById('s-disclaimer').value=s.disclaimer;
+  if(s.api)       document.getElementById('s-api').value=s.api;
+}
+function saveSettings(){
+  state.settings={
+    mgr:s('s-mgr'),fund:s('s-fund'),type:s('s-type'),
+    email:s('s-email'),disclaimer:s('s-disclaimer'),api:s('s-api')
+  };
+  persist();
+  document.getElementById('sb-name').textContent=state.settings.mgr||'Fund Manager';
+  document.getElementById('sb-fund').textContent=state.settings.fund||'Your Fund';
+  showToast('Settings saved.','green');
+}
+function s(id){return document.getElementById(id)?.value||'';}
+
+// ══ TRANSACTIONS ═══════════════════════════════════════════════
+function addTxn(data={}){
+  const list=document.getElementById('txn-list');
+  const d=document.createElement('div');
+  d.className='txn-row-item';
+  d.innerHTML=`
+    <div class="ff"><select style="width:100%;padding:0.38rem 0.5rem;font-size:0.8rem;border:1px solid var(--border);border-radius:var(--radius);background:#fff;font-family:'DM Sans',sans-serif">
+      <option ${data.type==='Capital Call'?'selected':''}>Capital Call</option>
+      <option ${data.type==='Distribution'?'selected':''}>Distribution</option>
+    </select></div>
+    <div class="ff"><input type="date" value="${data.date||''}" style="width:100%;padding:0.38rem 0.5rem;font-size:0.8rem;border:1px solid var(--border);border-radius:var(--radius);background:#fff"/></div>
+    <div class="ff"><input type="number" value="${data.shares||''}" placeholder="0.0000" style="width:100%;padding:0.38rem 0.5rem;font-size:0.8rem;border:1px solid var(--border);border-radius:var(--radius);background:#fff"/></div>
+    <div class="ff"><input type="number" value="${data.price||''}" placeholder="0.00" style="width:100%;padding:0.38rem 0.5rem;font-size:0.8rem;border:1px solid var(--border);border-radius:var(--radius);background:#fff"/></div>
+    <button class="rm-btn" onclick="this.parentElement.remove()">✕</button>`;
+  list.appendChild(d);
+}
+function collectTxns(){
+  return Array.from(document.querySelectorAll('#txn-list .txn-row-item')).map(r=>{
+    const inputs=r.querySelectorAll('select,input');
+    return {type:inputs[0].value,date:inputs[1].value,shares:inputs[2].value,price:inputs[3].value};
+  }).filter(t=>t.date&&t.shares&&t.price);
+}
+
+// ══ COLLECT LP FROM FORM ═══════════════════════════════════════
+function collectLP(){
+  return {
+    lp_name:        s('g-lpname'),
+    account_number: s('g-acct'),
+    fund_name:      s('g-fund'),
+    email:          s('g-email'),
+    vintage_year:   s('g-vintage'),
+    commitment:     s('g-commit'),
+    currency:       s('g-curr'),
+    period_from:    s('g-from'),
+    period_to:      s('g-to'),
+    opening_shares: s('g-oshares'),
+    opening_nav:    s('g-onav'),
+    closing_nav:    s('g-cnav'),
+    transactions:   collectTxns(),
+  };
+}
+function validateLP(lp){
+  if(!lp.lp_name)        return 'LP name is required.';
+  if(!lp.email)          return 'LP email is required.';
+  if(!lp.fund_name)      return 'Fund name is required.';
+  if(!lp.period_from)    return 'Period from date is required.';
+  if(!lp.period_to)      return 'Period to date is required.';
+  if(!lp.opening_shares) return 'Opening shares are required.';
+  if(!lp.opening_nav)    return 'Opening NAV is required.';
+  if(!lp.closing_nav)    return 'Closing NAV is required.';
+  if(!lp.commitment)     return 'Total commitment is required.';
+  return null;
+}
+
+// ══ SAVE LP ════════════════════════════════════════════════════
+function saveLP(){
+  const lp=collectLP();
+  const err=validateLP(lp); if(err){showToast(err,'red');return;}
+  const idx=state.lps.findIndex(i=>i.account_number===lp.account_number);
+  if(idx>=0){state.lps[idx]=lp;showToast('LP updated.','green');}
+  else{state.lps.push(lp);showToast('LP saved.','green');}
+  persist(); renderDashboard();
+}
+
+// ══ GENERATE ═══════════════════════════════════════════════════
+async function generateStatement(preloaded=null){
+  const lp=preloaded||collectLP();
+  const err=validateLP(lp); if(err){showToast(err,'red');return;}
+  const apiUrl=(state.settings.api||'/api/generate').trim();
+  showSpinner('Generating LP statement…');
+  try{
+    const res=await fetch(apiUrl,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({investor:lp}),
+    });
+    const data=await res.json();
+    hideSpinner();
+    if(!data.success){showToast('Error: '+(data.error||'Unknown'),'red');return;}
+
+    // Download
+    const bytes=Uint8Array.from(atob(data.file_b64),c=>c.charCodeAt(0));
+    const blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=data.filename;a.click();
+    URL.revokeObjectURL(url);
+    state.stmtCount++;
+
+    let emailStatus='—';
+    if(data.email_sent){state.emailCount++;emailStatus='✓ Sent';showToast(`Downloaded & emailed to ${lp.email}`,'green');}
+    else showToast(`Downloaded. Email: ${data.email_message}`,'navy');
+
+    // Calc gain/loss
+    const openVal=parseFloat(lp.opening_shares||0)*parseFloat(lp.opening_nav||0);
+    const txnShares=((lp.transactions||[]).reduce((s,t)=>s+(t.type==='Capital Call'?parseFloat(t.shares||0):-parseFloat(t.shares||0)),0));
+    const closeShares=parseFloat(lp.opening_shares||0)+txnShares;
+    const closeVal=closeShares*parseFloat(lp.closing_nav||0);
+    const netFlow=(lp.transactions||[]).reduce((s,t)=>{
+      const a=parseFloat(t.shares||0)*parseFloat(t.price||0);
+      return s+(t.type==='Capital Call'?a:-a);},0);
+    const gain=closeVal-openVal-netFlow;
+
+    state.history.unshift({
+      lp_name:lp.lp_name,fund_name:lp.fund_name,currency:lp.currency,
+      period_from:lp.period_from,period_to:lp.period_to,
+      gain:gain,email:emailStatus,filename:data.filename,file_b64:data.file_b64,ts:Date.now()
+    });
+    persist(); renderDashboard();
+  }catch(e){hideSpinner();showToast('Cannot reach API: '+e.message,'red');}
+}
+
+// ══ RENDER ═════════════════════════════════════════════════════
+function renderDashboard(){
+  document.getElementById('m-lps').textContent   = state.lps.length;
+  document.getElementById('m-stmts').textContent = state.stmtCount;
+  document.getElementById('m-emails').textContent= state.emailCount;
+  renderHistoryTable('dash-tbody');
+}
+function renderHistoryTable(id){
+  const tbody=document.getElementById(id);
+  if(!tbody)return;
+  if(!state.history.length){
+    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--ink3);padding:2rem">No statements yet.</td></tr>';return;
+  }
+  tbody.innerHTML=state.history.map((h,i)=>{
+    const gainFmt=fmtAmt(h.gain,h.currency);
+    const gainColor=h.gain>=0?'var(--green)':'var(--red)';
+    return `<tr>
+      <td>${h.lp_name}</td><td>${h.fund_name}</td>
+      <td><span class="curr-pill">${h.currency}</span></td>
+      <td>${h.period_from} – ${h.period_to}</td>
+      <td style="color:${gainColor};font-weight:500">${gainFmt}</td>
+      <td>${h.email}</td>
+      <td><div class="row-acts"><button class="iact" title="Re-download" onclick="reDownload(${i})">↓</button></div></td>
+    </tr>`;
+  }).join('');
+}
+function reDownload(i){
+  const h=state.history[i];
+  const bytes=Uint8Array.from(atob(h.file_b64),c=>c.charCodeAt(0));
+  const blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=h.filename;a.click();
+  URL.revokeObjectURL(url);
+}
+function renderLPs(){
+  const tbody=document.getElementById('lps-tbody');
+  if(!state.lps.length){tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--ink3);padding:2rem">No LPs saved yet.</td></tr>';return;}
+  tbody.innerHTML=state.lps.map((lp,i)=>`
+    <tr>
+      <td>${lp.lp_name}</td><td>${lp.account_number}</td><td>${lp.fund_name}</td>
+      <td><span class="curr-pill">${lp.currency}</span></td>
+      <td>${fmtAmt(parseFloat(lp.commitment||0),lp.currency)}</td>
+      <td><div class="row-acts">
+        <button class="iact" title="Generate" onclick="generateStatement(state.lps[${i}])">⚡</button>
+        <button class="iact" title="Load into form" onclick="loadIntoForm(${i})">✏</button>
+        <button class="iact" title="Delete" onclick="deleteLP(${i})">🗑</button>
+      </div></td>
+    </tr>`).join('');
+}
+function renderExistingList(){
+  const el=document.getElementById('existing-list');
+  if(!state.lps.length){el.innerHTML='<p style="font-size:0.85rem;color:var(--ink3)">No LPs saved yet. Use Manual Entry to add your first LP.</p>';return;}
+  el.innerHTML=state.lps.map((lp,i)=>`
+    <div class="inv-item" onclick="generateStatement(state.lps[${i}])">
+      <div>
+        <div style="font-size:0.88rem;font-weight:500">${lp.lp_name}</div>
+        <div style="font-size:0.73rem;color:var(--ink3)">${lp.account_number} · ${lp.fund_name} · <span class="curr-pill">${lp.currency}</span></div>
+      </div>
+      <span style="color:var(--ink3);font-size:0.8rem">⚡ Generate</span>
+    </div>`).join('');
+}
+function loadIntoForm(i){
+  const lp=state.lps[i];
+  document.getElementById('g-lpname').value  = lp.lp_name||'';
+  document.getElementById('g-acct').value    = lp.account_number||'';
+  document.getElementById('g-fund').value    = lp.fund_name||'';
+  document.getElementById('g-email').value   = lp.email||'';
+  document.getElementById('g-vintage').value = lp.vintage_year||'';
+  document.getElementById('g-commit').value  = lp.commitment||'';
+  document.getElementById('g-curr').value    = lp.currency||'USD';
+  document.getElementById('g-from').value    = lp.period_from||'';
+  document.getElementById('g-to').value      = lp.period_to||'';
+  document.getElementById('g-oshares').value = lp.opening_shares||'';
+  document.getElementById('g-onav').value    = lp.opening_nav||'';
+  document.getElementById('g-cnav').value    = lp.closing_nav||'';
+  document.getElementById('txn-list').innerHTML='';
+  (lp.transactions||[]).forEach(t=>addTxn(t));
+  goPage('p-generate',null);
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'));
+  document.querySelector('.tab').classList.add('active');
+  document.getElementById('gen-manual').style.display='block';
+  document.getElementById('gen-existing').style.display='none';
+}
+function deleteLP(i){state.lps.splice(i,1);persist();renderLPs();showToast('LP removed.','navy');}
+function filterHistory(q){
+  document.querySelectorAll('#dash-tbody tr,#hist-tbody tr').forEach(r=>{
+    r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';
+  });
+}
+
+// ══ BULK CSV ═══════════════════════════════════════════════════
+function downloadTemplate(){
+  const csv=`lp_name,account_number,email,commitment,opening_shares,opening_nav,closing_nav,period_from,period_to,txn_date,txn_type,txn_shares,txn_price
+Sequoia Capital,AEP-LP-001,lp@sequoia.com,5000000,50000,100.00,118.50,2024-01-01,2024-12-31,2024-03-15,Capital Call,5000,100.00
+Sequoia Capital,AEP-LP-001,lp@sequoia.com,5000000,50000,100.00,118.50,2024-01-01,2024-12-31,2024-09-30,Distribution,2000,115.00
+Andreessen Horowitz,AEP-LP-002,lp@a16z.com,10000000,100000,100.00,118.50,2024-01-01,2024-12-31,,,, `;
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='StatementIQ_US_Template.csv';a.click();
+}
+async function handleCSV(input){
+  const file=input.files[0]; if(!file)return;
+  const pw=document.getElementById('prog-wrap');
+  const pf=document.getElementById('prog-fill');
+  const pl=document.getElementById('prog-lbl');
+  pw.style.display='block';
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    const lines=e.target.result.split('\n').filter(l=>l.trim());
+    const headers=lines[0].split(',').map(h=>h.trim());
+    const groups={};
+    lines.slice(1).forEach(row=>{
+      const cols=row.split(',');
+      const obj={};headers.forEach((h,i)=>obj[h]=(cols[i]||'').trim());
+      const key=obj['account_number']||obj['lp_name'];if(!key)return;
+      if(!groups[key])groups[key]={
+        lp_name:obj['lp_name'],account_number:obj['account_number'],
+        email:obj['email'],commitment:obj['commitment'],
+        opening_shares:obj['opening_shares'],opening_nav:obj['opening_nav'],
+        closing_nav:document.getElementById('bulk-cnav').value||obj['closing_nav'],
+        period_from:document.getElementById('bulk-from').value||obj['period_from'],
+        period_to:document.getElementById('bulk-to').value||obj['period_to'],
+        fund_name:document.getElementById('bulk-fund').value||obj['fund_name']||'',
+        currency:document.getElementById('bulk-curr').value||'USD',
+        transactions:[]
+      };
+      if(obj['txn_date']&&obj['txn_shares']&&obj['txn_price'])
+        groups[key].transactions.push({type:obj['txn_type']||'Capital Call',date:obj['txn_date'],shares:obj['txn_shares'],price:obj['txn_price']});
+    });
+    const lps=Object.values(groups); let done=0;
+    for(const lp of lps){
+      pl.textContent=`Generating ${done+1} of ${lps.length}…`;
+      pf.style.width=((done/lps.length)*100)+'%';
+      await generateStatement(lp); done++;
+    }
+    pf.style.width='100%';pl.textContent=`${done} statements generated.`;
+    setTimeout(()=>{pw.style.display='none';input.value='';},2000);
+  };
+  reader.readAsText(file);
+}
+
+// ══ UTILS ══════════════════════════════════════════════════════
+function showSpinner(msg){document.getElementById('spinner-msg').textContent=msg||'Processing…';document.getElementById('spinner').classList.add('active');}
+function hideSpinner(){document.getElementById('spinner').classList.remove('active');}
+function showToast(msg,type='navy'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=`toast ${type}`;t.style.display='block';
+  clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',3200);
+}
+</script>
+</body>
+</html>
